@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { TextInput, View, Text, Image, TouchableOpacity } from "react-native";
+import { StyleSheet, TextInput, View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
+import { styles } from "./styles.js";
 
 export default class Pantalla extends Component {
   constructor(props) {
@@ -9,146 +10,87 @@ export default class Pantalla extends Component {
       velViento: "",
       buscarCiudad: "", 
       PreCiudad: "",
+      forecastDays: [],
     };
   }
 
   buscar = () => {
     const { buscarCiudad } = this.state;
     const url = `http://api.weatherapi.com/v1/forecast.json?key=8e6389607b744bfc973152818250402&q=${buscarCiudad}&days=5&aqi=no&alerts=no`;
-
-    // Utilizando fetch(url))
+  
     fetch(url)
-      .then((response) => response.json()) // Convertir la respuesta a JSON
+      .then((response) => response.json())
       .then((data) => {
-        // console.log(data.current.temp_c);  Ver el valor en la consola
-
-        const temperatura = data.current.temp_c;
-        const velViento = data.current.wind_kph;
-        const PreCiudad = data.current.precip_mm;
-
-        // Actualizar el estado con los nuevos valores
-        this.setState({
-          tempCiudad: temperatura + "°C",
-          velViento: velViento + " km/h", 
-          PreCiudad: PreCiudad + " % ",
-
-        });
+        if (data && data.forecast && data.forecast.forecastday) {
+          const today = new Date(); // Fecha local actual
+          const forecastDays = data.forecast.forecastday.filter((day) => {
+            const forecastDate = new Date(day.date); // Convertir fecha de la API a objeto Date
+            const dayDifference = Math.floor((forecastDate - today) / (1000 * 60 * 60 * 24)); // Calcular la diferencia en días
+            return dayDifference > 0 && dayDifference <= 5; // Filtrar los próximos 5 días
+          });
+          this.setState({
+            tempCiudad: `${data.current.temp_c}°C`,
+            velViento: `${data.current.wind_kph} km/h`, 
+            PreCiudad: `${data.current.precip_mm} mm`,
+            forecastDays: forecastDays, 
+          });
+        }
       })
       .catch((error) => {
-        console.error('Error fetching weather data:', error);
+        console.error('❌', error);
       });
   };
-
   render() {
     return (
-      <View>
-        <Text
-          style={{
-            color: "#09122C",
-            fontSize: 10,
-            marginTop: 50,
-            marginLeft: 40,
-          }}
-        >
-          App Tiempo
-        </Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>App Tiempo</Text>
 
-        <View>
-          <Image
-            source={require('./imagenes/nube.png')}
-            style={{
-              width: 300,
-              height: 200,
-              marginLeft: 0,
-              borderWidth: 0,
-            }}
-          />
+        <Image source={require('./imagenes/nube.png')} style={styles.weatherImage} />
+        <Text style={styles.temperatureText}>{this.state.tempCiudad}</Text>
 
-          <Text
-            style={{
-              color: "#09122C",
-              fontSize: 69,
-              marginTop: -140,
-              marginLeft: 80,
-              fontFamily: "monospace",
-            }}
-          >
-            {this.state.tempCiudad}
-          </Text>
-        </View>
-
-        <View>
+        {/* Input y botón de búsqueda */}
+        <View style={styles.inputContainer}>
           <TextInput
             onChangeText={(text) => this.setState({ buscarCiudad: text })}
             placeholder="Ciudad a buscar"
             keyboardType="default"
-            style={{
-              color: "#09122C",
-              marginLeft: 40,
-              marginTop: 50,
-              fontSize: 30,
-            }}
+            style={styles.input}
           />
           <TouchableOpacity onPress={this.buscar}>
-            <Image
-              source={require('./imagenes/lupa.png')}
-              style={{
-                width: 30,
-                height: 30,
-                marginTop: -37,
-                marginLeft: 230,
-                transform: [{ rotate: '90deg' }],
-              }}
-            />
+            <Image source={require('./imagenes/lupa.png')} style={styles.searchIcon} />
           </TouchableOpacity>
         </View>
 
-        <View>
-          <Image
-            source={require('./imagenes/viento.png')}
-            style={{
-              width: 80,
-              height: 80,
-              marginTop: 250,
-              marginLeft: -15,
-            }}
-          />
+        {/* Proximos  dias */}
+        <ScrollView horizontal style={styles.forecastScroll}>
+          {this.state.forecastDays.map((day, index) => (
+            <View key={index} style={styles.forecastItem}>
+              <Text style={styles.forecastText}>
+                {new Date(day.date).toLocaleDateString('es-ES', { weekday: 'long' })}
+              </Text>
+              <Image source={{ uri: `https:${day.day.condition.icon}` }} style={styles.forecastIcon} />
+              <Text style={styles.forecastText}>{day.day.avgtemp_c}°C</Text>
+              <Text style={styles.forecastText}>{day.day.condition.text}</Text>
+            </View>
+          ))}
+        </ScrollView>
 
-          <Text
-            style={{
-              color: "#09122C",
-              fontFamily: "monospace",
-              fontSize: 25,
-              marginTop: 10,
-              marginLeft: -15,
-            }}
-          >
-            {this.state.velViento}
-          </Text>
-
-          <Image
-            source={require('./imagenes/lluvia.png')}
-            style={{
-              width: 80,
-              height: 80,
-              marginTop: -120,
-              marginLeft: 230,
-            }}
-          />
-
-          <Text
-            style={{
-              color: "#09122C",
-              fontFamily: "monospace",
-              fontSize: 25,
-              marginTop: 10,
-              marginLeft: 260,
-            }}
-          >
-            {this.state.PreCiudad}
-          </Text>
+        {/* viento y lluvia */}
+        <View style={styles.windRainContainer}>
+          <View style={styles.windRainItem}>
+            <Image source={require('./imagenes/viento.png')} style={styles.windRainImage} />
+            <Text style={styles.windRainText}>{this.state.velViento}</Text>
+          </View>
+          <View style={styles.windRainItem}>
+            <Image source={require('./imagenes/lluvia.png')} style={styles.windRainImage} />
+            <Text style={styles.windRainText}>{this.state.PreCiudad}</Text>
+          </View>
         </View>
       </View>
+
+      
     );
   }
 }
+
+

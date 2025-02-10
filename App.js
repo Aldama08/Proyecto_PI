@@ -1,6 +1,7 @@
 
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Image, Alert } from 'react-native';
+import { styles } from './styles';
 import Pantalla from './Pantalla';  // Ensure you're using the capitalized name
 
 export default function App() {
@@ -12,13 +13,4 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 0,
-    marginLeft: 0,
-    flex: 1,
-    backgroundColor: '#E2E0C8',
-    alignItems: 'center',
-    // justifyContent: 'center',
-  },
-});
+
