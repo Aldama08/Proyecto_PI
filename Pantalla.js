@@ -25,8 +25,8 @@ export default class Pantalla extends Component {
           const today = new Date(); // Fecha local actual
           const forecastDays = data.forecast.forecastday.filter((day) => {
             const forecastDate = new Date(day.date); // Convertir fecha de la API a objeto Date
-            const dayDifference = Math.floor((forecastDate - today) / (1000 * 60 * 60 * 24)); // Calcular la diferencia en días
-            return dayDifference > 0 && dayDifference <= 5; // Filtrar los próximos 5 días
+            const dayDifference = Math.floor((forecastDate - today) / (1000 * 60 * 60 * 24)); // Diferencia en días
+            return dayDifference > 0 && dayDifference <= 5; // 5 días
           });
           this.setState({
             tempCiudad: `${data.current.temp_c}°C`,
