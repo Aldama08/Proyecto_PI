@@ -16,7 +16,7 @@ export default class Pantalla extends Component {
 
   buscar = () => {
     const { buscarCiudad } = this.state;
-    const url = `http://api.weatherapi.com/v1/forecast.json?key=8e6389607b744bfc973152818250402&q=${buscarCiudad}&days=5&aqi=no&alerts=no`;
+    const url = `http://api.weatherapi.com/v1/forecast.json?key=8e6389607b744bfc973152818250402&q=${buscarCiudad}&days=7&aqi=no&alerts=no`;
   
     fetch(url)
       .then((response) => response.json())
@@ -26,7 +26,7 @@ export default class Pantalla extends Component {
           const forecastDays = data.forecast.forecastday.filter((day) => {
             const forecastDate = new Date(day.date); // Convertir fecha de la API a objeto Date
             const dayDifference = Math.floor((forecastDate - today) / (1000 * 60 * 60 * 24)); // Diferencia en días
-            return dayDifference > 0 && dayDifference <= 5; // 5 días
+            return dayDifference > 0 && dayDifference <6; // 5 días
           });
           this.setState({
             tempCiudad: `${data.current.temp_c}°C`,
